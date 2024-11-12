@@ -8,6 +8,7 @@ import sys
 import argparse
 from PIL import Image
 
+os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 def get_subdirs(b='.'):
     '''
         Returns all sub-directories in a specific Path

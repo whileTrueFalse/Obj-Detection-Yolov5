@@ -4,7 +4,7 @@
 gitpython>=3.1.30
 matplotlib>=3.3
 numpy>=1.18.5
-opencv-python-headless>=4.1.1  # Replaced opencv-python with opencv-python-headless
+opencv-python-headless # Replaced opencv-python with opencv-python-headless
 Pillow>=7.1.2
 psutil
 PyYAML>=5.3.1

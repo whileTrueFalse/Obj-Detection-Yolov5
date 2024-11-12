@@ -8,9 +8,6 @@ import sys
 import argparse
 from PIL import Image
 
-# Disable file watching to avoid inotify limits
-os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
-
 def get_subdirs(b='.'):
     '''
         Returns all sub-directories in a specific Path
@@ -30,34 +27,35 @@ def get_detection_folder():
 
 if __name__ == '__main__':
 
-    st.title('Vehicle-Detection using YOLOv5')
+    st.title('YOLOv5 Streamlit App')
 
+    # Argument parser
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str,
-                        default='yolov5-streamlit-main/weights/yolov5s.pt', help='model.pt path(s)')
+                        default='weights/yolov5s.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str,
-                        default='yolov5-streamlit-main/data/images', help='source')
+                        default='data/images', help='source')
     parser.add_argument('--img-size', type=int, default=640,
                         help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float,
                         default=0.35, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, 
-                        default=0.45, help='IOU threshold for NMS') 
-    parser.add_argument('--device', default='', 
-                        help='cuda device, i.e. 0 or 0,1,2,3 or cpu') 
-    parser.add_argument('--view-img', action='store_true', 
-                        help='display results') 
-    parser.add_argument('--save-txt', action='store_true', 
-                        help='save results to *.txt') 
-    parser.add_argument('--save-conf', action='store_true', 
-                        help='save confidences in --save-txt labels') 
-    parser.add_argument('--nosave', action='store_true', 
-                        help='do not save images/videos') 
-    parser.add_argument('--classes', nargs='+', type=int, 
-                        help='filter by class: --class 0, or --class 0 2 3') 
-    parser.add_argument('--agnostic-nms', action='store_true', 
-                        help='class-agnostic NMS') 
-    parser.add_argument('--augment', action='store_true', 
+    parser.add_argument('--iou-thres', type=float,
+                        default=0.45, help='IOU threshold for NMS')
+    parser.add_argument('--device', default='',
+                        help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--view-img', action='store_true',
+                        help='display results')
+    parser.add_argument('--save-txt', action='store_true',
+                        help='save results to *.txt')
+    parser.add_argument('--save-conf', action='store_true',
+                        help='save confidences in --save-txt labels')
+    parser.add_argument('--nosave', action='store_true',
+                        help='do not save images/videos')
+    parser.add_argument('--classes', nargs='+', type=int,
+                        help='filter by class: --class 0, or --class 0 2 3')
+    parser.add_argument('--agnostic-nms', action='store_true',
+                        help='class-agnostic NMS')
+    parser.add_argument('--augment', action='store_true',
                         help='augmented inference')
     parser.add_argument('--update', action='store_true',
                         help='update all models')
@@ -70,58 +68,60 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
 
-    # Ensure the necessary directories exist
-    os.makedirs("yolov5-streamlit-main/data/images", exist_ok=True)
-    os.makedirs("yolov5-streamlit-main/data/videos", exist_ok=True)
+    # Ensure directories exist
+    os.makedirs("data/images", exist_ok=True)
+    os.makedirs("data/videos", exist_ok=True)
 
-    source = ("Image detection", "Video detection")
-    source_index = st.sidebar.selectbox("Select input", range(
+    # Input options
+    source = ("Image Detection", "Video Detection")
+    source_index = st.sidebar.selectbox("Select Input", range(
         len(source)), format_func=lambda x: source[x])
 
-    if source_index == 0:  # Image detection
-        uploaded_file = st.sidebar.file_uploader("Upload pictures", type=['png', 'jpeg', 'jpg'])
+    # Handle image upload
+    if source_index == 0:
+        uploaded_file = st.sidebar.file_uploader("Upload Image", type=['png', 'jpeg', 'jpg'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='Resources loading...'):
+            with st.spinner(text='Loading resources...'):
                 st.sidebar.image(uploaded_file)
-                picture = Image.open(uploaded_file)
-                image_path = os.path.join("yolov5-streamlit-main", "data", "images", uploaded_file.name)
-                picture.save(image_path)
-                opt.source = image_path  # Set the correct source path for detection
+                image_path = os.path.join("data", "images", uploaded_file.name)
+                Image.open(uploaded_file).save(image_path)
+                opt.source = image_path
         else:
             is_valid = False
-    else:  # Video detection
-        uploaded_file = st.sidebar.file_uploader("Upload video", type=['mp4'])
+
+    # Handle video upload
+    else:
+        uploaded_file = st.sidebar.file_uploader("Upload Video", type=['mp4'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='Resources loading...'):
+            with st.spinner(text='Loading resources...'):
                 st.sidebar.video(uploaded_file)
-                video_path = os.path.join("yolov5-streamlit-main", "data", "videos", uploaded_file.name)
+                video_path = os.path.join("data", "videos", uploaded_file.name)
                 with open(video_path, "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = video_path  # Set the correct source path for detection
+                opt.source = video_path
         else:
             is_valid = False
 
     if is_valid:
-        print('File found, starting detection...')
-        if st.button('Start testing'):
-            detect(opt)  # Run the YOLOv5 detection
+        print('File is valid, starting detection...')
+        if st.button('Start Detection'):
+            detect(opt)
 
-            # Get the output folder only once after detection is complete
             detection_folder = get_detection_folder()
 
-            if source_index == 0:  # Image display
+            if source_index == 0:  # Display detected images
                 with st.spinner(text='Preparing Images'):
                     for img in os.listdir(detection_folder):
-                        img_path = str(Path(detection_folder) / img)
-                        st.image(img_path, caption=f"Processed: {img}")
+                        img_path = os.path.join(detection_folder, img)
+                        st.image(img_path, caption=f"Detected: {img}")
                     st.balloons()
-            else:  # Video display
+            else:  # Display detected video
                 with st.spinner(text='Preparing Video'):
                     video_files = [vid for vid in os.listdir(detection_folder) if vid.endswith('.mp4')]
                     if video_files:
-                        video_path = str(Path(detection_folder) / video_files[0])
+                        video_path = os.path.join(detection_folder, video_files[0])
                         st.video(video_path)
                     else:
                         st.warning("No video output found.")

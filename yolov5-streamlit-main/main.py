@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str,
-                        default='yolov5-streamlit-main/weights/yolov5s.pt', help='model.pt path(s)')
+                        default='weights/yolov5s.pt', help='model.pt path(s)')
     parser.add_argument('--source', type=str,
                         default='data/images', help='source')
     parser.add_argument('--img-size', type=int, default=640,
@@ -94,9 +94,11 @@ if __name__ == '__main__':
             is_valid = True
             with st.spinner(text='Resources loading...'):
                 st.sidebar.video(uploaded_file)
-                with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
+# Ensure the correct path to save uploaded videos
+                with open(os.path.join("yolov5-streamlit-main", "data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = f'yolov5-streamlit-main/data/videos{uploaded_file.name}'
+                opt.source = f'yolov5-streamlit-main/data/videos/{uploaded_file.name}'
+
         else:
             is_valid = False
 

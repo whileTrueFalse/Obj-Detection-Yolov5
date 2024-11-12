@@ -7,7 +7,11 @@ import os
 import sys
 import argparse
 from PIL import Image
+import subprocess
+import sys
 
+# Install opencv-python-headless if not already installed
+subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
 
 def get_subdirs(b='.'):
     '''

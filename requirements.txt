@@ -9,7 +9,7 @@ numpy
 tqdm
 pyyaml
 matplotlib
-
+seaborn
 # Image processing
 Pillow
 

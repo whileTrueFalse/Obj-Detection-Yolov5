@@ -29,7 +29,7 @@ def get_detection_folder():
 
 if __name__ == '__main__':
 
-    st.title('YOLOv5 Streamlit App')
+    st.title('Vehicle-Detection using Yolo')
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str,
@@ -81,8 +81,8 @@ if __name__ == '__main__':
             with st.spinner(text='Resources loading...'):
                 st.sidebar.image(uploaded_file)
                 picture = Image.open(uploaded_file)
-                picture = picture.save(f'data/images/{uploaded_file.name}')
-                opt.source = f'data/images/{uploaded_file.name}'
+                picture = picture.save(f'yolov5-streamlit-main\data\images\{uploaded_file.name}')
+                opt.source = f'yolov5-streamlit-main\data\images\{uploaded_file.name}'
         else:
             is_valid = False
     else:
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                 st.sidebar.video(uploaded_file)
                 with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = f'data/videos/{uploaded_file.name}'
+                opt.source = f'yolov5-streamlit-main\data\videos\{uploaded_file.name}'
         else:
             is_valid = False
 

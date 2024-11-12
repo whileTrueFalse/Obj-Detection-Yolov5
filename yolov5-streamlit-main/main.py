@@ -7,15 +7,6 @@ import os
 import sys
 import argparse
 from PIL import Image
-import subprocess
-import sys
-
-try:
-    import cv2
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
-    import cv2
-
 
 def get_subdirs(b='.'):
     '''

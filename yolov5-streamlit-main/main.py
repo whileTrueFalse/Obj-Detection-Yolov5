@@ -70,16 +70,16 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
 
-    source = ("图片检测", "视频检测")
-    source_index = st.sidebar.selectbox("选择输入", range(
+    source = ("Image detection", "Video detection")
+    source_index = st.sidebar.selectbox("Select input", range(
         len(source)), format_func=lambda x: source[x])
 
     if source_index == 0:
         uploaded_file = st.sidebar.file_uploader(
-            "上传图片", type=['png', 'jpeg', 'jpg'])
+            "Upload pictures", type=['png', 'jpeg', 'jpg'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='资源加载中...'):
+            with st.spinner(text='Resources loading...'):
                 st.sidebar.image(uploaded_file)
                 picture = Image.open(uploaded_file)
                 picture = picture.save(f'data/images/{uploaded_file.name}')
@@ -87,10 +87,10 @@ if __name__ == '__main__':
         else:
             is_valid = False
     else:
-        uploaded_file = st.sidebar.file_uploader("上传视频", type=['mp4'])
+        uploaded_file = st.sidebar.file_uploader("Upload video", type=['mp4'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='资源加载中...'):
+            with st.spinner(text='Resources loading...'):
                 st.sidebar.video(uploaded_file)
                 with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     if is_valid:
         print('valid')
-        if st.button('开始检测'):
+        if st.button('Start testing'):
 
             detect(opt)
 

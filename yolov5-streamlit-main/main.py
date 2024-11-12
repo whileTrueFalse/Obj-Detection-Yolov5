@@ -8,7 +8,9 @@ import sys
 import argparse
 from PIL import Image
 
+# Disable file watching to avoid inotify limits
 os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
+
 def get_subdirs(b='.'):
     '''
         Returns all sub-directories in a specific Path
@@ -105,13 +107,21 @@ if __name__ == '__main__':
         if st.button('Start testing'):
             detect(opt)
 
-            if source_index == 0:
+            # Get the output folder only once after detection is complete
+            detection_folder = get_detection_folder()
+
+            if source_index == 0:  # Image display
                 with st.spinner(text='Preparing Images'):
-                    for img in os.listdir(get_detection_folder()):
-                        st.image(str(Path(f'{get_detection_folder()}') / img))
+                    for img in os.listdir(detection_folder):
+                        img_path = str(Path(detection_folder) / img)
+                        st.image(img_path, caption=f"Processed: {img}")
                     st.balloons()
-            else:
+            else:  # Video display
                 with st.spinner(text='Preparing Video'):
-                    for vid in os.listdir(get_detection_folder()):
-                        st.video(str(Path(f'{get_detection_folder()}') / vid))
+                    video_files = [vid for vid in os.listdir(detection_folder) if vid.endswith('.mp4')]
+                    if video_files:
+                        video_path = str(Path(detection_folder) / video_files[0])
+                        st.video(video_path)
+                    else:
+                        st.warning("No video output found.")
                     st.balloons()

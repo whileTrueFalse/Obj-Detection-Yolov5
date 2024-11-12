@@ -10,8 +10,12 @@ from PIL import Image
 import subprocess
 import sys
 
-# Install opencv-python-headless if not already installed
-subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+try:
+    import cv2
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+    import cv2
+
 
 def get_subdirs(b='.'):
     '''

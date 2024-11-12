@@ -1,3 +1,19 @@
+
+The FileNotFoundError for weights/yolov5s.pt indicates that the YOLOv5 model weights file is missing from the weights directory. Here’s how to address this issue:
+
+Solution 1: Download the Weights Manually
+Download the weights file:
+Go to the YOLOv5 GitHub releases page.
+Download yolov5s.pt and place it in the weights directory within yolov5-streamlit-main.
+Verify the Path:
+Ensure the downloaded file is named exactly yolov5s.pt and resides in yolov5-streamlit-main/weights/.
+Solution 2: Automate the Download in Code
+Alternatively, you can add code to download the weights file programmatically if it’s missing. This way, the file will be downloaded automatically when you run the app.
+
+Here’s how to modify the code to check for the file and download it if needed:
+
+python
+Copy code
 from io import StringIO
 from pathlib import Path
 import streamlit as st
@@ -7,6 +23,19 @@ import os
 import sys
 import argparse
 from PIL import Image
+import urllib.request
+
+def download_weights():
+    weights_path = 'weights/yolov5s.pt'
+    if not os.path.exists(weights_path):
+        st.warning("Downloading YOLOv5 model weights...")
+        os.makedirs('weights', exist_ok=True)
+        url = 'https://github.com/ultralytics/yolov5/releases/download/v6.0/yolov5s.pt'
+        urllib.request.urlretrieve(url, weights_path)
+        st.success("YOLOv5 weights downloaded successfully.")
+
+# Call the download function at the start
+download_weights()
 
 def get_subdirs(b='.'):
     '''

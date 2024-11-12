@@ -19,13 +19,11 @@ def get_subdirs(b='.'):
             result.append(bd)
     return result
 
-
 def get_detection_folder():
     '''
-        Returns the latest folder in a runs\detect
+        Returns the latest folder in runs/detect
     '''
     return max(get_subdirs(os.path.join('runs', 'detect')), key=os.path.getmtime)
-
 
 if __name__ == '__main__':
 
@@ -40,23 +38,23 @@ if __name__ == '__main__':
                         help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float,
                         default=0.35, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float,
-                        default=0.45, help='IOU threshold for NMS')
-    parser.add_argument('--device', default='',
-                        help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--view-img', action='store_true',
-                        help='display results')
-    parser.add_argument('--save-txt', action='store_true',
-                        help='save results to *.txt')
-    parser.add_argument('--save-conf', action='store_true',
-                        help='save confidences in --save-txt labels')
-    parser.add_argument('--nosave', action='store_true',
-                        help='do not save images/videos')
-    parser.add_argument('--classes', nargs='+', type=int,
-                        help='filter by class: --class 0, or --class 0 2 3')
-    parser.add_argument('--agnostic-nms', action='store_true',
-                        help='class-agnostic NMS')
-    parser.add_argument('--augment', action='store_true',
+    parser.add_argument('--iou-thres', type=float, 
+                        default=0.45, help='IOU threshold for NMS') 
+    parser.add_argument('--device', default='', 
+                        help='cuda device, i.e. 0 or 0,1,2,3 or cpu') 
+    parser.add_argument('--view-img', action='store_true', 
+                        help='display results') 
+    parser.add_argument('--save-txt', action='store_true', 
+                        help='save results to *.txt') 
+    parser.add_argument('--save-conf', action='store_true', 
+                        help='save confidences in --save-txt labels') 
+    parser.add_argument('--nosave', action='store_true', 
+                        help='do not save images/videos') 
+    parser.add_argument('--classes', nargs='+', type=int, 
+                        help='filter by class: --class 0, or --class 0 2 3') 
+    parser.add_argument('--agnostic-nms', action='store_true', 
+                        help='class-agnostic NMS') 
+    parser.add_argument('--augment', action='store_true', 
                         help='augmented inference')
     parser.add_argument('--update', action='store_true',
                         help='update all models')
@@ -68,6 +66,10 @@ if __name__ == '__main__':
                         help='existing project/name ok, do not increment')
     opt = parser.parse_args()
     print(opt)
+
+    # Ensure the necessary directories exist
+    os.makedirs("data/images", exist_ok=True)
+    os.makedirs("data/videos", exist_ok=True)
 
     source = ("Image detection", "Video detection")
     source_index = st.sidebar.selectbox("Select input", range(
@@ -81,8 +83,8 @@ if __name__ == '__main__':
             with st.spinner(text='Resources loading...'):
                 st.sidebar.image(uploaded_file)
                 picture = Image.open(uploaded_file)
-                picture = picture.save(f'yolov5-streamlit-main\data\images\{uploaded_file.name}')
-                opt.source = f'yolov5-streamlit-main\data\images\{uploaded_file.name}'
+                picture.save(f'data/images/{uploaded_file.name}')
+                opt.source = f'data/images/{uploaded_file.name}'
         else:
             is_valid = False
     else:
@@ -93,25 +95,22 @@ if __name__ == '__main__':
                 st.sidebar.video(uploaded_file)
                 with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = f'yolov5-streamlit-main\data\videos\{uploaded_file.name}'
+                opt.source = f'data/videos/{uploaded_file.name}'
         else:
             is_valid = False
 
     if is_valid:
         print('valid')
         if st.button('Start testing'):
-
             detect(opt)
 
             if source_index == 0:
                 with st.spinner(text='Preparing Images'):
                     for img in os.listdir(get_detection_folder()):
                         st.image(str(Path(f'{get_detection_folder()}') / img))
-
                     st.balloons()
             else:
                 with st.spinner(text='Preparing Video'):
                     for vid in os.listdir(get_detection_folder()):
                         st.video(str(Path(f'{get_detection_folder()}') / vid))
-
                     st.balloons()

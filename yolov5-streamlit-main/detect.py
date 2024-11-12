@@ -1,8 +1,14 @@
 import argparse
 import time
 from pathlib import Path
+import subprocess
+import sys
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+    import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random

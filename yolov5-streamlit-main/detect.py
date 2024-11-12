@@ -1,11 +1,6 @@
 import argparse
 import time
 from pathlib import Path
-from pyvirtualdisplay import Display
-
-# Start a virtual display
-display = Display(visible=0, size=(800, 600))
-display.start()
 import cv2
 import torch
 import torch.backends.cudnn as cudnn

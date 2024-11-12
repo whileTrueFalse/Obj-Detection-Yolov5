@@ -1,7 +1,18 @@
+# Streamlit for web interface
 streamlit
+
+# YOLOv5 dependencies
 torch
 torchvision
 opencv-python-headless
 numpy
 tqdm
 pyyaml
+matplotlib
+
+# Image processing
+Pillow
+
+# Other utilities
+# subprocess, sys, time, argparse, and pathlib are standard libraries in Python, 
+# so they don't need to be included in requirements.txt.

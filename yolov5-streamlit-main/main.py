@@ -69,8 +69,8 @@ if __name__ == '__main__':
     print(opt)
 
     # Ensure the necessary directories exist
-    os.makedirs("data/images", exist_ok=True)
-    os.makedirs("data/videos", exist_ok=True)
+    os.makedirs("yolov5-streamlit-main/data/images", exist_ok=True)
+    os.makedirs("yolov5-streamlit-main/data/videos", exist_ok=True)
 
     source = ("Image detection", "Video detection")
     source_index = st.sidebar.selectbox("Select input", range(
@@ -84,8 +84,8 @@ if __name__ == '__main__':
             with st.spinner(text='Resources loading...'):
                 st.sidebar.image(uploaded_file)
                 picture = Image.open(uploaded_file)
-                picture.save(f'data/images/{uploaded_file.name}')
-                opt.source = f'data/images/{uploaded_file.name}'
+                picture.save(f'yolov5-streamlit-main/data/images{uploaded_file.name}')
+                opt.source = f'yolov5-streamlit-main/data/images{uploaded_file.name}'
         else:
             is_valid = False
     else:
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 st.sidebar.video(uploaded_file)
                 with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = f'data/videos/{uploaded_file.name}'
+                opt.source = f'yolov5-streamlit-main/data/videos{uploaded_file.name}'
         else:
             is_valid = False
 

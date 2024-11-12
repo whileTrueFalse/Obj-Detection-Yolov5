@@ -94,11 +94,9 @@ if __name__ == '__main__':
             is_valid = True
             with st.spinner(text='Resources loading...'):
                 st.sidebar.video(uploaded_file)
-# Ensure the correct path to save uploaded videos
                 with open(os.path.join("yolov5-streamlit-main", "data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = f'yolov5-streamlit-main/data/videos/{uploaded_file.name}'
-
+                opt.source = f'yolov5-streamlit-main/data/videos{uploaded_file.name}'
         else:
             is_valid = False
 

@@ -1,32 +1,32 @@
-# Start FROM Nvidia PyTorch image
+# Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 FROM nvcr.io/nvidia/pytorch:21.03-py3
 
-# Install necessary system packages, including libgl1
+# Install system dependencies, including libgl1 for OpenGL support
 RUN apt-get update && apt-get install -y \
-    libgl1 \
+    libgl1-mesa-glx \
     libglib2.0-0 \
-    libxrender1 \
     libsm6 \
     libxext6 \
-    && rm -rf /var/lib/apt/lists/*
+    libxrender-dev
 
-# Set working directory
+# Install python dependencies
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip
+RUN pip uninstall -y nvidia-tensorboard nvidia-tensorboard-plugin-dlprof
+RUN pip install --no-cache -r requirements.txt coremltools onnx gsutil notebook
+
+# Create working directory
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-# Copy the project files into the Docker container
-COPY . .
+# Copy contents
+COPY . /usr/src/app
 
-# Upgrade pip and install Python dependencies from requirements.txt
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# Set environment variables
+ENV HOME=/usr/src/app
 
-# Expose the port for Streamlit
+# Expose the port that Streamlit will use
 EXPOSE 8501
 
-# Set environment variables to configure Streamlit for deployment
-ENV STREAMLIT_SERVER_HEADLESS=true
-ENV STREAMLIT_SERVER_PORT=8501
-ENV STREAMLIT_SERVER_ENABLECORS=false
-
-# Command to run Streamlit app
+# Run Streamlit
 CMD ["streamlit", "run", "main.py", "--server.port=8501"]

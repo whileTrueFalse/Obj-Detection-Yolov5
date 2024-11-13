@@ -8,6 +8,7 @@ import sys
 import argparse
 from PIL import Image
 
+
 def get_subdirs(b='.'):
     '''
         Returns all sub-directories in a specific Path
@@ -19,17 +20,18 @@ def get_subdirs(b='.'):
             result.append(bd)
     return result
 
+
 def get_detection_folder():
     '''
-        Returns the latest folder in runs/detect
+        Returns the latest folder in a runs\detect
     '''
     return max(get_subdirs(os.path.join('runs', 'detect')), key=os.path.getmtime)
+
 
 if __name__ == '__main__':
 
     st.title('YOLOv5 Streamlit App')
 
-    # Argument parser
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str,
                         default='weights/yolov5s.pt', help='model.pt path(s)')
@@ -68,61 +70,49 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
 
-    # Ensure directories exist
-    os.makedirs("data/images", exist_ok=True)
-    os.makedirs("data/videos", exist_ok=True)
-
-    # Input options
-    source = ("Image Detection", "Video Detection")
-    source_index = st.sidebar.selectbox("Select Input", range(
+    source = ("图片检测", "视频检测")
+    source_index = st.sidebar.selectbox("选择输入", range(
         len(source)), format_func=lambda x: source[x])
 
-    # Handle image upload
     if source_index == 0:
-        uploaded_file = st.sidebar.file_uploader("Upload Image", type=['png', 'jpeg', 'jpg'])
+        uploaded_file = st.sidebar.file_uploader(
+            "上传图片", type=['png', 'jpeg', 'jpg'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='Loading resources...'):
+            with st.spinner(text='资源加载中...'):
                 st.sidebar.image(uploaded_file)
-                image_path = os.path.join("data", "images", uploaded_file.name)
-                Image.open(uploaded_file).save(image_path)
-                opt.source = image_path
+                picture = Image.open(uploaded_file)
+                picture = picture.save(f'data/images/{uploaded_file.name}')
+                opt.source = f'data/images/{uploaded_file.name}'
         else:
             is_valid = False
-
-    # Handle video upload
     else:
-        uploaded_file = st.sidebar.file_uploader("Upload Video", type=['mp4'])
+        uploaded_file = st.sidebar.file_uploader("上传视频", type=['mp4'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='Loading resources...'):
+            with st.spinner(text='资源加载中...'):
                 st.sidebar.video(uploaded_file)
-                video_path = os.path.join("data", "videos", uploaded_file.name)
-                with open(video_path, "wb") as f:
+                with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                opt.source = video_path
+                opt.source = f'data/videos/{uploaded_file.name}'
         else:
             is_valid = False
 
     if is_valid:
-        print('File is valid, starting detection...')
-        if st.button('Start Detection'):
+        print('valid')
+        if st.button('开始检测'):
+
             detect(opt)
 
-            detection_folder = get_detection_folder()
-
-            if source_index == 0:  # Display detected images
+            if source_index == 0:
                 with st.spinner(text='Preparing Images'):
-                    for img in os.listdir(detection_folder):
-                        img_path = os.path.join(detection_folder, img)
-                        st.image(img_path, caption=f"Detected: {img}")
+                    for img in os.listdir(get_detection_folder()):
+                        st.image(str(Path(f'{get_detection_folder()}') / img))
+
                     st.balloons()
-            else:  # Display detected video
+            else:
                 with st.spinner(text='Preparing Video'):
-                    video_files = [vid for vid in os.listdir(detection_folder) if vid.endswith('.mp4')]
-                    if video_files:
-                        video_path = os.path.join(detection_folder, video_files[0])
-                        st.video(video_path)
-                    else:
-                        st.warning("No video output found.")
-                    st.balloons() 
+                    for vid in os.listdir(get_detection_folder()):
+                        st.video(str(Path(f'{get_detection_folder()}') / vid))
+
+                    st.balloons()

@@ -1,13 +1,13 @@
 # Start FROM Nvidia PyTorch image
 FROM nvcr.io/nvidia/pytorch:21.03-py3
 
-# Install necessary system packages
+# Install necessary system packages, including libgl1
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
+    libxrender1 \
     libsm6 \
     libxext6 \
-    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -16,11 +16,11 @@ WORKDIR /usr/src/app
 # Copy the project files into the Docker container
 COPY . .
 
-# Install Python dependencies
+# Upgrade pip and install Python dependencies from requirements.txt
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port that Streamlit will run on
+# Expose the port for Streamlit
 EXPOSE 8501
 
 # Set environment variables to configure Streamlit for deployment

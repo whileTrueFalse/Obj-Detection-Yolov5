@@ -1,54 +1,46 @@
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 FROM nvcr.io/nvidia/pytorch:21.03-py3
 
-# Install linux packages
-RUN apt update && apt install -y zip htop screen libgl1-mesa-glx
-RUN apt-get update && apt-get install -y libgl1
+# Install essential Linux packages for OpenCV and general utilities
+RUN apt-get update && \
+    apt-get install -y zip htop screen libgl1-mesa-glx libgl1 && \
+    rm -rf /var/lib/apt/lists/*
 
+# Install Python dependencies from requirements.txt
+COPY requirements.txt .  
+RUN python -m pip install --upgrade pip  # Upgrade pip to the latest version
+RUN pip uninstall -y nvidia-tensorboard nvidia-tensorboard-plugin-dlprof  # Avoid conflicts with Streamlit and Flask
+RUN pip install --no-cache-dir -r requirements.txt coremltools onnx gsutil notebook  # Install all dependencies
 
-# Install python dependencies
-COPY requirements.txt .
-RUN python -m pip install --upgrade pip
-RUN pip uninstall -y nvidia-tensorboard nvidia-tensorboard-plugin-dlprof
-RUN pip install --no-cache -r requirements.txt coremltools onnx gsutil notebook
-
-# Create working directory
+# Set up the working directory for the application
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-# Copy contents
+# Copy application code into the container
 COPY . /usr/src/app
 
 # Set environment variables
 ENV HOME=/usr/src/app
+ENV PYTHONUNBUFFERED=1  
 
+# Expose the default port for Streamlit or Flask (e.g., 8501 for Streamlit, 5000 for Flask)
+EXPOSE 8501 
+EXPOSE 5000  
 
-# ---------------------------------------------------  Extras Below  ---------------------------------------------------
+# ---------------------------------------------------  Extra Commands  ---------------------------------------------------
+# Below are additional helpful Docker commands for running, debugging, and managing containers.
 
-# Build and Push
-# t=ultralytics/yolov5:latest && sudo docker build -t $t . && sudo docker push $t
-# for v in {300..303}; do t=ultralytics/coco:v$v && sudo docker build -t $t . && sudo docker push $t; done
+# To build and push this image to Docker Hub:
+# t=yourdockerhubusername/yourimagename:latest && docker build -t $t . && docker push $t
 
-# Pull and Run
-# t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all $t
+# To pull and run the image with GPU support:
+# t=yourdockerhubusername/yourimagename:latest && docker pull $t && docker run -it --ipc=host --gpus all -p 8501:8501 $t
 
-# Pull and Run with local directory access
-# t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all -v "$(pwd)"/coco:/usr/src/coco $t
+# To bash into a running container:
+# docker exec -it <container_id> bash
 
-# Kill all
-# sudo docker kill $(sudo docker ps -q)
+# To bash into a stopped container:
+# id=$(docker ps -qa) && docker start $id && docker exec -it $id bash
 
-# Kill all image-based
-# sudo docker kill $(sudo docker ps -qa --filter ancestor=ultralytics/yolov5:latest)
-
-# Bash into running container
-# sudo docker exec -it 5a9b5863d93d bash
-
-# Bash into stopped container
-# id=$(sudo docker ps -qa) && sudo docker start $id && sudo docker exec -it $id bash
-
-# Send weights to GCP
-# python -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')" && gsutil cp tmp.pt gs://*.pt
-
-# Clean up
+# To clean up Docker system:
 # docker system prune -a --volumes

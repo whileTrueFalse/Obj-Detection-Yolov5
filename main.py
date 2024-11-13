@@ -8,7 +8,6 @@ import sys
 import argparse
 from PIL import Image
 
-
 def get_subdirs(b='.'):
     '''
         Returns all sub-directories in a specific Path
@@ -20,13 +19,11 @@ def get_subdirs(b='.'):
             result.append(bd)
     return result
 
-
 def get_detection_folder():
     '''
-        Returns the latest folder in a runs\detect
+        Returns the latest folder in runs/detect
     '''
     return max(get_subdirs(os.path.join('runs', 'detect')), key=os.path.getmtime)
-
 
 if __name__ == '__main__':
 
@@ -70,27 +67,30 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
 
-    source = ("图片检测", "视频检测")
-    source_index = st.sidebar.selectbox("选择输入", range(
+    # Input options
+    source = ("Image Detection", "Video Detection")
+    source_index = st.sidebar.selectbox("Select Input", range(
         len(source)), format_func=lambda x: source[x])
 
+    # Image upload
     if source_index == 0:
         uploaded_file = st.sidebar.file_uploader(
-            "上传图片", type=['png', 'jpeg', 'jpg'])
+            "Upload Image", type=['png', 'jpeg', 'jpg'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='资源加载中...'):
+            with st.spinner(text='Loading resources...'):
                 st.sidebar.image(uploaded_file)
                 picture = Image.open(uploaded_file)
                 picture = picture.save(f'data/images/{uploaded_file.name}')
                 opt.source = f'data/images/{uploaded_file.name}'
         else:
             is_valid = False
+    # Video upload
     else:
-        uploaded_file = st.sidebar.file_uploader("上传视频", type=['mp4'])
+        uploaded_file = st.sidebar.file_uploader("Upload Video", type=['mp4'])
         if uploaded_file is not None:
             is_valid = True
-            with st.spinner(text='资源加载中...'):
+            with st.spinner(text='Loading resources...'):
                 st.sidebar.video(uploaded_file)
                 with open(os.path.join("data", "videos", uploaded_file.name), "wb") as f:
                     f.write(uploaded_file.getbuffer())
@@ -98,12 +98,14 @@ if __name__ == '__main__':
         else:
             is_valid = False
 
+    # Run detection if file is valid
     if is_valid:
-        print('valid')
-        if st.button('开始检测'):
+        print('File is valid')
+        if st.button('Start Detection'):
 
             detect(opt)
 
+            # Display images or video based on selection
             if source_index == 0:
                 with st.spinner(text='Preparing Images'):
                     for img in os.listdir(get_detection_folder()):
